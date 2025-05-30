@@ -4,16 +4,16 @@ This project is a C++ console application designed for managing and analyzing fi
 
 ## Table of Contents
 
-1.  [Project Overview](https://www.google.com/search?q=%23project-overview)
-2.  [Features](https://www.google.com/search?q=%23features)
-3.  [Data Structures and Algorithms](https://www.google.com/search?q=%23data-structures-and-algorithms)
-4.  [Prerequisites](https://www.google.com/search?q=%23prerequisites)
-5.  [Repository Layout](https://www.google.com/search?q=%23repository-layout)
-6.  [Installation & Build](https://www.google.com/search?q=%23installation--build)
-7.  [Usage](https://www.google.com/search?q=%23usage)
-8.  [CSV Format Expectations](https://www.google.com/search?q=%23csv-format-expectations)
-9.  [Performance Tips](https://www.google.com/search?q=%23performance-tips)
-10. [License](https://www.google.com/search?q=%23license)
+1.  [Project Overview](https://github.com/hiroyuki01233/apu-data-structure-assignment/tree/main?tab=readme-ov-file#1-project-overview)
+2.  [Features](https://github.com/hiroyuki01233/apu-data-structure-assignment/tree/main?tab=readme-ov-file#2-features)
+3.  [Data Structures and Algorithms](https://github.com/hiroyuki01233/apu-data-structure-assignment/tree/main?tab=readme-ov-file#3-data-structures-and-algorithms)
+4.  [Prerequisites](https://github.com/hiroyuki01233/apu-data-structure-assignment/tree/main?tab=readme-ov-file#4-prerequisites)
+5.  [Repository Layout](https://github.com/hiroyuki01233/apu-data-structure-assignment/tree/main?tab=readme-ov-file#5-repository-layout)
+6.  [Installation & Build](https://github.com/hiroyuki01233/apu-data-structure-assignment/tree/main?tab=readme-ov-file#6-installation--build)
+7.  [Usage](https://github.com/hiroyuki01233/apu-data-structure-assignment/tree/main?tab=readme-ov-file#7-usage)
+8.  [CSV Format Expectations](https://github.com/hiroyuki01233/apu-data-structure-assignment/tree/main?tab=readme-ov-file#8-csv-format-expectations)
+9.  [Performance Tips](https://github.com/hiroyuki01233/apu-data-structure-assignment/tree/main?tab=readme-ov-file#9-performance-tips)
+10. [License](https://github.com/hiroyuki01233/apu-data-structure-assignment/tree/main?tab=readme-ov-file#10-license)
 
 -----
 
