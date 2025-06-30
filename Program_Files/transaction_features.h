@@ -1,4 +1,3 @@
-// File: transaction_features.h
 #ifndef TRANSACTION_FEATURES_H
 #define TRANSACTION_FEATURES_H
 #include <iostream>

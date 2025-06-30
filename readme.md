@@ -111,7 +111,7 @@ This project focuses on deepening the understanding of data structures and algor
         -I. \
         -Ithird_party/fast-cpp-csv-parser \
         -Ithird_party/rapidjson/include \
-        -std=c++11 -pthread
+        -std=c++17 -pthread
     ```
 
 4.  Grant executable permissions to the compiled binary:

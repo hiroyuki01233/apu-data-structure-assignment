@@ -5,10 +5,11 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include <queue> // std::queue を使用するため
-#include "transaction.h" // Transaction 構造体を使用するため
+#include <queue>
+#include "transaction.h"
+#include "custom_data_structures.h"
 
-// A simple thread-safe queue for Transactions (ここに移す)
+
 template<typename T>
 class ThreadSafeQueue {
     std::queue<T>           _q;
@@ -40,15 +41,13 @@ public:
     }
 };
 
-// グローバルキューはここではなく、.cppファイルで定義するか、
-// クラスのメンバーとして渡すことを検討すべきですが、
-// 今回はシンプルにするためにここで定義
-extern ThreadSafeQueue<Transaction> txQueue; // 外部リンケージを宣言
+extern ThreadSafeQueue<Transaction> txQueue;
 
-// Parser worker: reads CSV and enqueues Transactions
 void parserWorker(const std::string& inFile);
 
-// Writer worker: dequeues Transactions and streams them out as JSON
 void writerWorker(const std::string& outFile);
 
-#endif // CSV_JSON_PROCESSING_H
+void saveTransactionsToJson(const TransactionArray& transactions, const std::string& outFile);
+
+
+#endif
