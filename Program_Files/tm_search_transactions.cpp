@@ -67,9 +67,10 @@ std::string generateUniqueFilename() {
     return ss.str();
 }
 
-// UNIFIED TRUE STRUCTURE SEARCH - Works for ALL search types
 void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria& criteria, const std::string& searchTitle) {
     std::cout << "\n" << Color::CYAN << "=== " << searchTitle << " ===" << Color::RESET << "\n";
+    
+    TransactionArray resultsToSave;
     
     auto startTime = std::chrono::high_resolution_clock::now();
     
@@ -81,11 +82,8 @@ void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria&
     std::cout << Color::BRIGHT_YELLOW << "🔥 ACTIVE STRUCTURE: " << manager->getCurrentDataStructureName() << Color::RESET << "\n";
     std::cout << Color::CYAN << "---------------------------------------------------" << Color::RESET << "\n";
 
-    // TRUE DUAL STRUCTURE: Use active structure for BOTH search AND storage
     if (manager->isUsingArray()) {
         std::cout << Color::GREEN << "📊 Using Array for BOTH search AND result storage" << Color::RESET << "\n";
-        
-        TransactionArray searchResults;  // Array storage for Array search
         
         for (int i = 0; i < manager->getTransactionCount(); ++i) {
             try {
@@ -94,7 +92,6 @@ void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria&
                 
                 bool matches = true;
                 
-                // Apply all search criteria
                 if (matches && !criteria.transactionType.empty()) {
                     if (toLowercase(txPtr->transaction_type) != toLowercase(criteria.transactionType)) {
                         matches = false;
@@ -125,10 +122,9 @@ void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria&
                     found = true;
                     matchCount++;
                     
-                    // Store result in Array structure
-                    searchResults.addTransaction(*txPtr);
+                    resultsToSave.addTransaction(*txPtr);
 
-                    if (searchResults.getSize() <= MAX_DISPLAY) {
+                    if (resultsToSave.getSize() <= MAX_DISPLAY) {
                         std::cout << Color::GREEN << "  [" << matchCount << "]" << Color::RESET 
                                   << " ID: " << Color::YELLOW << txPtr->transaction_id << Color::RESET
                                   << " | Type: " << Color::BRIGHT_CYAN << txPtr->transaction_type << Color::RESET
@@ -146,29 +142,13 @@ void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria&
             } catch (const std::exception& e) {
                 std::cerr << Color::RED << "Error accessing transaction: " << e.what() << Color::RESET << std::endl;
                 break;
-            }
-        }
-        
-        // Save Array results
-        if (found) {
-            try {
-                std::string filename = generateUniqueFilename() + "_array.json";
-                std::string filepath = "results/" + filename;
-                std::cout << Color::CYAN << "[ARRAY SAVE]" << Color::RESET 
-                        << " Saving " << searchResults.getSize() << " results to " << Color::YELLOW << filepath << Color::RESET << "..." << std::endl;
-                saveTransactionsToJson(searchResults, filepath);
-                std::cout << Color::BRIGHT_GREEN << "[SUCCESS]" << Color::RESET 
-                          << " Array results saved!" << Color::RESET << "\n";
-            } catch (const std::exception& e) {
-                std::cout << Color::RED << "[ERROR]" << Color::RESET 
-                          << " Failed to save results: " << e.what() << "\n";
             }
         }
         
     } else {
         std::cout << Color::BLUE << "📊 Using LinkedList for BOTH search AND result storage" << Color::RESET << "\n";
         
-        TransactionLinkedList searchResults;  // LinkedList storage for LinkedList search
+        TransactionLinkedList searchResults;
         
         for (int i = 0; i < manager->getTransactionCount(); ++i) {
             try {
@@ -177,7 +157,6 @@ void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria&
                 
                 bool matches = true;
                 
-                // Apply all search criteria (same logic as Array)
                 if (matches && !criteria.transactionType.empty()) {
                     if (toLowercase(txPtr->transaction_type) != toLowercase(criteria.transactionType)) {
                         matches = false;
@@ -208,7 +187,6 @@ void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria&
                     found = true;
                     matchCount++;
                     
-                    // Store result in LinkedList structure
                     searchResults.addTransaction(*txPtr);
 
                     if (searchResults.getSize() <= MAX_DISPLAY) {
@@ -232,27 +210,12 @@ void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria&
             }
         }
         
-        // Convert LinkedList results to Array for saving
         if (found) {
-            try {
-                TransactionArray arrayForSaving;
-                for (int i = 0; i < searchResults.getSize(); ++i) {
-                    Transaction* tx = searchResults.getTransaction(i);
-                    if (tx) {
-                        arrayForSaving.addTransaction(*tx);
-                    }
+             for (int i = 0; i < searchResults.getSize(); ++i) {
+                Transaction* tx = searchResults.getTransaction(i);
+                if (tx) {
+                    resultsToSave.addTransaction(*tx);
                 }
-                
-                std::string filename = generateUniqueFilename() + "_linkedlist.json";
-                std::string filepath = "results/" + filename;
-                std::cout << Color::CYAN << "[LINKEDLIST SAVE]" << Color::RESET 
-                        << " Saving " << arrayForSaving.getSize() << " results to " << Color::YELLOW << filepath << Color::RESET << "..." << std::endl;
-                saveTransactionsToJson(arrayForSaving, filepath);
-                std::cout << Color::BRIGHT_GREEN << "[SUCCESS]" << Color::RESET 
-                          << " LinkedList results saved!" << Color::RESET << "\n";
-            } catch (const std::exception& e) {
-                std::cout << Color::RED << "[ERROR]" << Color::RESET 
-                          << " Failed to save results: " << e.what() << "\n";
             }
         }
     }
@@ -299,6 +262,36 @@ void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria&
                   << Color::RESET << " milliseconds\n";
     }
     std::cout << Color::CYAN << "===================================" << Color::RESET << "\n";
+
+
+    if (found) {
+        std::cout << "\n" << Color::BRIGHT_YELLOW << "❓ Do you want to save these " << resultsToSave.getSize() 
+                  << " results to a JSON file? (y/n): " << Color::RESET;
+        char saveChoice;
+        std::cin >> saveChoice;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+        if (saveChoice == 'y' || saveChoice == 'Y') {
+            try {
+                std::string origin_suffix = manager->isUsingArray() ? "_array.json" : "_linkedlist.json";
+                std::string filename = generateUniqueFilename() + origin_suffix;
+                std::string filepath = "results/" + filename;
+
+                std::cout << Color::CYAN << "\n[SAVING]" << Color::RESET 
+                          << " Saving results to " << Color::YELLOW << filepath << Color::RESET << "..." << std::endl;
+                
+                saveTransactionsToJson(resultsToSave, filepath);
+                
+                std::cout << Color::BRIGHT_GREEN << "[SUCCESS]" << Color::RESET 
+                          << " Results saved!" << Color::RESET << "\n";
+            } catch (const std::exception& e) {
+                std::cout << Color::RED << "[ERROR]" << Color::RESET 
+                          << " Failed to save results: " << e.what() << "\n";
+            }
+        } else {
+            std::cout << Color::YELLOW << "[INFO]" << Color::RESET << " Results not saved." << std::endl;
+        }
+    }
 }
 
 // Performance comparison between structures for any search type

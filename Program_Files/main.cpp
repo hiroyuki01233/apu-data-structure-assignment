@@ -12,13 +12,10 @@
 void showMenu() {
     std::cout << "\n## Financial Transaction Analysis System ##\n";
     std::cout << "=========================================\n";
-    std::cout << "1. Load & Store Transactions by Payment Channel\n";
-    std::cout << "2. Sort Transactions by Location\n";
-    std::cout << "3. Search Transactions by Type\n";
-    std::cout << "4. Generate JSON from Active Data\n";
-    std::cout << "5. Display All Stored Transactions\n";
-    std::cout << "6. Perform Full CSV to JSON Conversion (Bulk)\n";
-    std::cout << "7. Switch Active Data Structure\n";
+    std::cout << "1. Sort Transactions by Location\n";
+    std::cout << "2. Search Transactions by Type\n";
+    std::cout << "3. Perform Full CSV to JSON Conversion (Bulk)\n";
+    std::cout << "4. Switch Active Data Structure\n";
     std::cout << "0. Exit\n";
     std::cout << "-----------------------------------------\n";
     std::cout << "Enter your choice: ";
@@ -63,25 +60,13 @@ int main(int argc, char* argv[]) {
 
         switch (choice) {
             case 1:
-                transactionManager.storeByPaymentChannel();
-                break;
-            case 2:
                 transactionManager.sortTransactions();
                 break;
-            case 3:
+            case 2:
                 transactionManager.searchTransactions();
                 break;
-            case 4: {
-                std::string outputJsonFile;
-                std::cout << "Enter output JSON file path: ";
-                std::getline(std::cin, outputJsonFile);
-                transactionManager.generateJson(outputJsonFile);
-                break;
-            }
-            case 5:
-                transactionManager.displayAll();
-                break;
-            case 6: {
+            case 3:
+            {
                 std::string outputBulkJsonFile;
                 std::cout << "Enter output JSON file path for bulk conversion: ";
                 std::getline(std::cin, outputBulkJsonFile);
@@ -97,8 +82,11 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case 7:
+            case 4:
                 transactionManager.switchDataStructure();
+                break;
+            case 5:
+                transactionManager.displayAll();
                 break;
             case 0:
                 std::cout << "Exiting program. Goodbye!\n";
