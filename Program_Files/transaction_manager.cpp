@@ -5,9 +5,10 @@
 #include <sstream>
 #include <cstdlib>
 #include "third_party/fast-cpp-csv-parser/csv.h"
+#include <chrono>
 
 TransactionManager::TransactionManager()
-    : transactionsArray(500000),
+    : transactionsArray(5000000),
       transactionsLinkedList(),
       useArrayDataStructure(true)
 {
@@ -30,6 +31,9 @@ bool TransactionManager::loadTransactionsFromCsv(const std::string& filePath) {
                 fraud_s, ft, tsl, sds_s, vs_s, gas_s, pc, ip, dh;
 
     int count = 0;
+    std::chrono::duration<double, std::milli> array_load_time(0);
+    std::chrono::duration<double, std::milli> list_load_time(0);
+
     while (in.read_row(id, ts, sa, ra, amt_s, tt, mc, loc, du, fraud_s, ft, tsl, sds_s, vs_s, gas_s, pc, ip, dh)) {
         Transaction tx;
         tx.transaction_id = std::move(id);
@@ -51,11 +55,27 @@ bool TransactionManager::loadTransactionsFromCsv(const std::string& filePath) {
         tx.ip_address = std::move(ip);
         tx.device_hash = std::move(dh);
 
+        auto start_array = std::chrono::high_resolution_clock::now();
         transactionsArray.addTransaction(tx);
+        auto end_array = std::chrono::high_resolution_clock::now();
+        array_load_time += (end_array - start_array);
+
+        auto start_list = std::chrono::high_resolution_clock::now();
         transactionsLinkedList.addTransaction(tx);
+        auto end_list = std::chrono::high_resolution_clock::now();
+        list_load_time += (end_list - start_list);
+
         count++;
     }
+
     std::cout << "Transactions loaded successfully. Total: " << count << " transactions in each data structure.\n";
+    
+    // ===== 変更点: 計測結果を出力 =====
+    std::cout << "-----------------------------------------\n";
+    std::cout << "Time to populate TransactionArray:      " << array_load_time.count() << " ms\n";
+    std::cout << "Time to populate TransactionLinkedList: " << list_load_time.count() << " ms\n";
+    std::cout << "-----------------------------------------\n";
+
     return true;
 }
 

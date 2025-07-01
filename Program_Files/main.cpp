@@ -2,11 +2,12 @@
 #include <string>
 #include <limits>
 #include <filesystem>
+#include <thread>        
+#include <iomanip>
+#include <sstream>
 #include "transaction_features.h"
 #include "transaction_manager.h"
 #include "csv_json_processing.h"
-#include <iomanip>
-#include <sstream>
 
 void showMenu() {
     std::cout << "\n## Financial Transaction Analysis System ##\n";
@@ -84,12 +85,16 @@ int main(int argc, char* argv[]) {
                 std::string outputBulkJsonFile;
                 std::cout << "Enter output JSON file path for bulk conversion: ";
                 std::getline(std::cin, outputBulkJsonFile);
-                // ★ 修正: bulk conversionの呼び出し方を修正
-                std::thread parser(parserWorker, initialCsvFile);
-                std::thread writer(writerWorker, outputBulkJsonFile);
-                parser.join();
-                writer.join();
-                std::cout << "Bulk conversion completed.\n";
+                // Bulk conversion using threading
+                try {
+                    std::thread parser(parserWorker, initialCsvFile);
+                    std::thread writer(writerWorker, outputBulkJsonFile);
+                    parser.join();
+                    writer.join();
+                    std::cout << "Bulk conversion completed.\n";
+                } catch (const std::exception& e) {
+                    std::cerr << "Error during bulk conversion: " << e.what() << std::endl;
+                }
                 break;
             }
             case 7:
