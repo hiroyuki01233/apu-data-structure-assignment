@@ -85,9 +85,6 @@ int main(int argc, char* argv[]) {
             case 4:
                 transactionManager.switchDataStructure();
                 break;
-            case 5:
-                transactionManager.displayAll();
-                break;
             case 0:
                 std::cout << "Exiting program. Goodbye!\n";
                 break;

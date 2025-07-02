@@ -35,6 +35,10 @@ bool TransactionManager::loadTransactionsFromCsv(const std::string& filePath) {
     std::chrono::duration<double, std::milli> list_load_time(0);
 
     while (in.read_row(id, ts, sa, ra, amt_s, tt, mc, loc, du, fraud_s, ft, tsl, sds_s, vs_s, gas_s, pc, ip, dh)) {
+        if (count > 5000000){
+            break;
+        }
+
         Transaction tx;
         tx.transaction_id = std::move(id);
         tx.timestamp = std::move(ts);
@@ -70,7 +74,6 @@ bool TransactionManager::loadTransactionsFromCsv(const std::string& filePath) {
 
     std::cout << "Transactions loaded successfully. Total: " << count << " transactions in each data structure.\n";
     
-    // ===== 変更点: 計測結果を出力 =====
     std::cout << "-----------------------------------------\n";
     std::cout << "Time to populate TransactionArray:      " << array_load_time.count() << " ms\n";
     std::cout << "Time to populate TransactionLinkedList: " << list_load_time.count() << " ms\n";

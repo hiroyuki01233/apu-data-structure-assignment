@@ -29,8 +29,9 @@ namespace Color {
     extern const std::string BG_BLUE;
 }
 
+
 class TransactionManager {
-private:
+public:
     TransactionArray transactionsArray;
     TransactionLinkedList transactionsLinkedList;
     
@@ -95,6 +96,8 @@ public:
         }
         std::cout << std::string(40, '=') << "\n";
     }
+
+    void performFullStructureSortComparison(); 
 };
 
 #endif

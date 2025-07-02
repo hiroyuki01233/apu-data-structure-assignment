@@ -53,6 +53,9 @@ public:
     void addTransaction(const Transaction& tx);
     int getSize() const;
 
+    TransactionNode* getHead() const { return head; };
+    void setHead(TransactionNode* newHead) { head = newHead; };
+
     Transaction* getTransaction(int index);
     const Transaction* getTransaction(int index) const;
 };
