@@ -59,7 +59,7 @@ bool TransactionManager::loadTransactionsFromCsv(const std::string& filePath) {
     std::chrono::duration<double, std::milli> list_load_time(0);
 
     while (in.read_row(id, ts, sa, ra, amt_s, tt, mc, loc, du, fraud_s, ft, tsl, sds_s, vs_s, gas_s, pc, ip, dh)) {
-        if (count > 500000){
+        if (count > 50000){
             break;
         }
 
