@@ -10,6 +10,9 @@
 #include <sstream>
 #include <iomanip>
 #include <sys/resource.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 namespace Color {
     const std::string RESET = "\033[0m";
@@ -69,9 +72,21 @@ std::string generateUniqueFilename() {
 }
 
 long getMemoryUsageKB() {
-    struct rusage usage;
-    getrusage(RUSAGE_SELF, &usage);
-    return usage.ru_maxrss;
+    long rss = 0L;
+    FILE* fp = fopen("/proc/self/status", "r");
+    if (fp != NULL) {
+        char line[128];
+        while (fgets(line, 128, fp) != NULL) {
+            if (strncmp(line, "VmRSS:", 6) == 0) {
+                char* p = line;
+                while (*p && !isdigit(*p)) p++;
+                rss = atol(p);
+                break;
+            }
+        }
+        fclose(fp);
+    }
+    return rss;
 }
 
 void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria& criteria, const std::string& searchTitle) {

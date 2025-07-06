@@ -7,11 +7,25 @@
 #include "third_party/fast-cpp-csv-parser/csv.h"
 #include <chrono>
 #include <sys/resource.h>
+#include <cstdio>
+#include <cstring>
 
 static long getMemoryUsageKB() {
-    struct rusage usage;
-    getrusage(RUSAGE_SELF, &usage);
-    return usage.ru_maxrss;
+    long rss = 0L;
+    FILE* fp = fopen("/proc/self/status", "r");
+    if (fp != NULL) {
+        char line[128];
+        while (fgets(line, 128, fp) != NULL) {
+            if (strncmp(line, "VmRSS:", 6) == 0) {
+                char* p = line;
+                while (*p && !isdigit(*p)) p++;
+                rss = atol(p);
+                break;
+            }
+        }
+        fclose(fp);
+    }
+    return rss;
 }
 
 TransactionManager::TransactionManager()
