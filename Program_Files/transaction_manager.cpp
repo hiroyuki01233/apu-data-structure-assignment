@@ -29,7 +29,7 @@ static long getMemoryUsageKB() {
 }
 
 TransactionManager::TransactionManager()
-    : transactionsArray(5000),
+    : transactionsArray(500000),
       transactionsLinkedList(),
       useArrayDataStructure(true)
 {
