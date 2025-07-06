@@ -7,6 +7,13 @@
 #include <iomanip>
 #include <sstream>
 #include "csv_json_processing.h"
+#include <sys/resource.h>
+
+static long getMemoryUsageKB() {
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    return usage.ru_maxrss;
+}
 
 enum class SortField {
     LOCATION,
@@ -282,6 +289,7 @@ void performSort(TransactionManager* manager) {
               << " using " << (algoChoice == 1 ? "QuickSort" : "MergeSort") 
               << " on " << manager->getCurrentDataStructureName() << "..." << Color::RESET << "\n";
     
+    long memoryBefore = getMemoryUsageKB();
     auto start = std::chrono::high_resolution_clock::now();
 
     if (manager->isUsingArray()) {
@@ -325,8 +333,12 @@ void performSort(TransactionManager* manager) {
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> duration = end - start;
+    long memoryAfter = getMemoryUsageKB();
+    long memoryUsed = memoryAfter - memoryBefore;
     
     std::cout << Color::GREEN << "⏱️  Time Taken: " << Color::YELLOW << duration.count() << " ms" << Color::RESET << "\n";
+    std::cout << Color::BLUE << "💾 Memory Usage: " << Color::YELLOW << memoryUsed 
+              << " KB (current total: " << memoryAfter << " KB)" << Color::RESET << "\n";
     std::cout << Color::BRIGHT_GREEN << "✅ Sort complete!" << Color::RESET << "\n\n";
 
     std::cout << Color::CYAN << "First 10 sorted results:" << Color::RESET << "\n";
@@ -421,6 +433,7 @@ void TransactionManager::performFullStructureSortComparison() {
 
     std::cout << "\n" << Color::GREEN << "🔵 Testing ARRAY structure..." << Color::RESET << "\n";
     setActiveDataStructure(true);
+    long arrayMemBefore = getMemoryUsageKB();
     auto startA = std::chrono::high_resolution_clock::now();
     if (algoChoice == 1)
         quickSortArray(transactionsArray.getDataPointer(), 0, transactionsArray.getSize() - 1, comparator);
@@ -428,9 +441,12 @@ void TransactionManager::performFullStructureSortComparison() {
         mergeSortArray(transactionsArray.getDataPointer(), 0, transactionsArray.getSize() - 1, comparator);
     auto endA = std::chrono::high_resolution_clock::now();
     auto arrayDuration = std::chrono::duration<double, std::milli>(endA - startA).count();
+    long arrayMemAfter = getMemoryUsageKB();
+    long arrayMemUsed = arrayMemAfter - arrayMemBefore;
 
     std::cout << Color::BLUE << "🔵 Testing LINKEDLIST structure..." << Color::RESET << "\n";
     setActiveDataStructure(false);
+    long listMemBefore = getMemoryUsageKB();
     auto startL = std::chrono::high_resolution_clock::now();
     
     int nodeCount = 0;
@@ -453,16 +469,22 @@ void TransactionManager::performFullStructureSortComparison() {
     transactionsLinkedList = newList;
     auto endL = std::chrono::high_resolution_clock::now();
     auto listDuration = std::chrono::duration<double, std::milli>(endL - startL).count();
+    long listMemAfter = getMemoryUsageKB();
+    long listMemUsed = listMemAfter - listMemBefore;
 
     std::cout << std::fixed << std::setprecision(2);
     std::cout << "\n" << Color::BOLD << Color::BRIGHT_CYAN 
-              << "📊 Sorting Time Comparison (" << getFieldName(field) << ", " 
+              << "📊 Sorting Comparison (" << getFieldName(field) << ", " 
               << (algoChoice == 1 ? "QuickSort" : "MergeSort") << ")" << Color::RESET << "\n";
     std::cout << std::string(60, '=') << "\n";
     std::cout << std::left << std::setw(25) << Color::GREEN + "Array Time:" + Color::RESET
               << std::right << std::setw(15) << arrayDuration << " ms\n";
+    std::cout << std::left << std::setw(25) << Color::GREEN + "Array Memory:" + Color::RESET
+              << std::right << std::setw(15) << arrayMemUsed << " KB\n";
     std::cout << std::left << std::setw(25) << Color::BLUE + "LinkedList Time:" + Color::RESET
               << std::right << std::setw(15) << listDuration << " ms\n";
+    std::cout << std::left << std::setw(25) << Color::BLUE + "LinkedList Memory:" + Color::RESET
+              << std::right << std::setw(15) << listMemUsed << " KB\n";
     std::cout << std::string(60, '-') << "\n";
     
     if (arrayDuration > 0 && listDuration > 0) {

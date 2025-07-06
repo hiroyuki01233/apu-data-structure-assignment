@@ -9,6 +9,7 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
+#include <sys/resource.h>
 
 namespace Color {
     const std::string RESET = "\033[0m";
@@ -67,11 +68,18 @@ std::string generateUniqueFilename() {
     return ss.str();
 }
 
+long getMemoryUsageKB() {
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    return usage.ru_maxrss;
+}
+
 void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria& criteria, const std::string& searchTitle) {
     std::cout << "\n" << Color::CYAN << "=== " << searchTitle << " ===" << Color::RESET << "\n";
     
     TransactionArray resultsToSave;
     
+    long memoryBefore = getMemoryUsageKB();
     auto startTime = std::chrono::high_resolution_clock::now();
     
     bool found = false;
@@ -222,6 +230,8 @@ void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria&
 
     auto endTime = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    long memoryAfter = getMemoryUsageKB();
+    long memoryUsed = memoryAfter - memoryBefore;
     
     std::cout << Color::CYAN << "---------------------------------------------------" << Color::RESET << "\n";
     if (found) {
@@ -245,6 +255,10 @@ void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria&
                   << Color::RESET << " milliseconds\n";
         
         std::cout << Color::BLUE << "[MEMORY]" << Color::RESET 
+                  << " Memory usage: " << Color::YELLOW << memoryUsed 
+                  << Color::RESET << " KB (current total: " << Color::YELLOW << memoryAfter << Color::RESET << " KB)\n";
+        
+        std::cout << Color::BLUE << "[STRUCTURE]" << Color::RESET 
                   << " Used " << (manager->isUsingArray() ? Color::GREEN + "Array" : Color::BLUE + "LinkedList") 
                   << Color::RESET << " for both search AND result storage\n";
         
@@ -260,6 +274,9 @@ void performUnifiedTrueSearch(TransactionManager* manager, const SearchCriteria&
         std::cout << Color::MAGENTA << "[TIME]" << Color::RESET 
                   << " Search time: " << Color::YELLOW << duration.count() 
                   << Color::RESET << " milliseconds\n";
+        std::cout << Color::BLUE << "[MEMORY]" << Color::RESET 
+                  << " Memory usage: " << Color::YELLOW << memoryUsed 
+                  << Color::RESET << " KB (current total: " << Color::YELLOW << memoryAfter << Color::RESET << " KB)\n";
     }
     std::cout << Color::CYAN << "===================================" << Color::RESET << "\n";
 

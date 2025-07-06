@@ -49,11 +49,12 @@ Transaction* TransactionArray::getTransaction(int index) {
 
 const Transaction* TransactionArray::getTransaction(int index) const {
     if (index < 0 || index >= size) {
-        std::cerr << "Error: Index out of bounds in TransactionArray::getTransaction(" << index << ") const\n";
+        std::cerr << "Error: Index out of bounds in TransactionArray::getTransaction(" << index << ")\n";
         return nullptr;
     }
     return &data[index];
 }
+
 Transaction* TransactionArray::getDataPointer() {
     return data;
 }

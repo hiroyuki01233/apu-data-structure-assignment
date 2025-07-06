@@ -6,9 +6,16 @@
 #include <cstdlib>
 #include "third_party/fast-cpp-csv-parser/csv.h"
 #include <chrono>
+#include <sys/resource.h>
+
+static long getMemoryUsageKB() {
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    return usage.ru_maxrss;
+}
 
 TransactionManager::TransactionManager()
-    : transactionsArray(5000000),
+    : transactionsArray(5000),
       transactionsLinkedList(),
       useArrayDataStructure(true)
 {
@@ -19,6 +26,9 @@ TransactionManager::TransactionManager()
 
 bool TransactionManager::loadTransactionsFromCsv(const std::string& filePath) {
     std::cout << "Loading transactions from " << filePath << " into BOTH Array and LinkedList...\n";
+
+    long memoryBefore = getMemoryUsageKB();
+    auto totalStartTime = std::chrono::high_resolution_clock::now();
 
     io::CSVReader<18, io::trim_chars<' '>, io::no_quote_escape<','>> in(filePath);
     
@@ -35,7 +45,7 @@ bool TransactionManager::loadTransactionsFromCsv(const std::string& filePath) {
     std::chrono::duration<double, std::milli> list_load_time(0);
 
     while (in.read_row(id, ts, sa, ra, amt_s, tt, mc, loc, du, fraud_s, ft, tsl, sds_s, vs_s, gas_s, pc, ip, dh)) {
-        if (count > 5000000){
+        if (count > 500000){
             break;
         }
 
@@ -72,11 +82,18 @@ bool TransactionManager::loadTransactionsFromCsv(const std::string& filePath) {
         count++;
     }
 
+    auto totalEndTime = std::chrono::high_resolution_clock::now();
+    auto totalDuration = std::chrono::duration_cast<std::chrono::milliseconds>(totalEndTime - totalStartTime);
+    long memoryAfter = getMemoryUsageKB();
+    long memoryUsed = memoryAfter - memoryBefore;
+
     std::cout << "Transactions loaded successfully. Total: " << count << " transactions in each data structure.\n";
     
     std::cout << "-----------------------------------------\n";
     std::cout << "Time to populate TransactionArray:      " << array_load_time.count() << " ms\n";
     std::cout << "Time to populate TransactionLinkedList: " << list_load_time.count() << " ms\n";
+    std::cout << "Total loading time:                     " << totalDuration.count() << " ms\n";
+    std::cout << "Memory usage:                           " << memoryUsed << " KB (current total: " << memoryAfter << " KB)\n";
     std::cout << "-----------------------------------------\n";
 
     return true;
